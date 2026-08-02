@@ -1,6 +1,6 @@
-package dev.speedslicer.init;
+package dev.speedslicer.main.init;
 
-import dev.speedslicer.PlatformAPI;
+import dev.speedslicer.api.PlatformAPI;
 
 import java.util.Objects;
 

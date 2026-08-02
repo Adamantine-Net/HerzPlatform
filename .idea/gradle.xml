@@ -1,15 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/module-eag-1_14" name="eaglercraft-workspace-1_14">
+                <projects>
+                  <project path="$PROJECT_DIR$/module-eag-1_14" />
+                  <project path="$PROJECT_DIR$/module-eag-1_14/target_lwjgl_desktop" />
+                  <project path="$PROJECT_DIR$/module-eag-1_14/target_teavm_javascript" />
+                  <project path="$PROJECT_DIR$/module-eag-1_14/target_teavm_wasm_gc" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/module-eag-1_14" />
+            <option value="$PROJECT_DIR$/module-eag-1_14/target_lwjgl_desktop" />
+            <option value="$PROJECT_DIR$/module-eag-1_14/target_teavm_javascript" />
+            <option value="$PROJECT_DIR$/module-eag-1_14/target_teavm_wasm_gc" />
           </set>
         </option>
-        <option name="myGradleHome" value="" />
       </GradleProjectSettings>
     </option>
   </component>

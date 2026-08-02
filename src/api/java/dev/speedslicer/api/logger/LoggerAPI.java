@@ -1,4 +1,4 @@
-package dev.speedslicer.logger;
+package dev.speedslicer.api.logger;
 
 public interface LoggerAPI {
     void info(String message);

@@ -1,4 +1,4 @@
-package dev.speedslicer.bootstrap;
+package dev.speedslicer.api.bootstrap;
 
 public interface ClientInitializer {
     void setup();

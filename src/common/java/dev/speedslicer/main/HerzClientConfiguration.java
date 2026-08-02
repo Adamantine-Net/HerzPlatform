@@ -1,4 +1,4 @@
-package dev.speedslicer;
+package dev.speedslicer.main;
 
 public class HerzClientConfiguration {
     public static final String clientBrandName = "Herz Example Client";
