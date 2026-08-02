@@ -1,6 +1,7 @@
 package dev.speedslicer.main.init;
 
 import dev.speedslicer.api.PlatformAPI;
+import dev.speedslicer.main.HerzClientConfiguration;
 
 import java.util.Objects;
 
@@ -13,7 +14,7 @@ public class HerzClientManager {
     public static void initialize(PlatformAPI platformAPI) {
         if (platform != null) {
             throw new IllegalStateException(
-                    "MeinHerzBrennt is already initialized"
+                    HerzClientConfiguration.clientBrandName + " is already initialized"
             );
         }
 
@@ -22,13 +23,13 @@ public class HerzClientManager {
                 "platformAPI"
         );
 
-        platform.logger().info("MeinHerzBrennt initialized");
+        platform.logger().info(HerzClientConfiguration.clientBrandName + " initialized");
     }
 
     public static PlatformAPI platform() {
         if (platform == null) {
             throw new IllegalStateException(
-                    "MeinHerzBrennt has not been initialized"
+                    HerzClientConfiguration.clientBrandName + " has not been initialized"
             );
         }
 
