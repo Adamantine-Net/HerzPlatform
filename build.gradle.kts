@@ -58,6 +58,28 @@ gradle.includedBuilds
         )
     }
 
+subprojects
+    .filter { it.name.startsWith("mixins-") }
+    .forEach { mixinsProject ->
+
+        val version = mixinsProject.name.removePrefix("mixins-")
+
+        tasks.register("compileFull_$version") {
+            group = "eaglercraft $version"
+            description = "weaves the $version mixins onto the vanilla eagler classes"
+
+            dependsOn("${mixinsProject.path}:compileFull")
+        }
+
+        tasks.register("buildFull_$version") {
+            group = "eaglercraft $version"
+            description = "weaves mixins then builds the js client for eag $version"
+
+            dependsOn("compileFull_$version")
+            dependsOn("buildJavaScript_$version")
+        }
+    }
+
 tasks.register("buildAllEagler") {
     group = "eaglercraft"
     description = "Builds every Eaglercraft version"
