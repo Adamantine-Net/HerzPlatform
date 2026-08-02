@@ -16,6 +16,14 @@ repositories {
 val eaglerModule = gradle.includedBuild("module-eag-1_8")
 val vanillaClassesDir = rootDir.resolve("module-eag-1_8/build/classes/java/main")
 
+//fixed/changed
+sourceSets {
+    named("main") {
+        java.srcDir(rootDir.resolve("src/common/java"))
+        java.exclude("dev/speedslicer/**") //YAY IT COMPILED
+    }
+}
+
 dependencies {
     compileOnly(files(vanillaClassesDir))
     implementation(project(":mixin-loader"))

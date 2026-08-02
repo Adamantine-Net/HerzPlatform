@@ -1,4 +1,4 @@
-package dev.notanorange.mixins.v1_14;
+package dev.notanorange.mixins.v1_8;
 
 import dev.notanorange.mixin.annotation.At;
 import dev.notanorange.mixin.annotation.Inject;

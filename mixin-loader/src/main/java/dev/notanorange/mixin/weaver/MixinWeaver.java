@@ -48,6 +48,11 @@ public final class MixinWeaver {
         deleteRecursive(outDir);
         copyRecursive(vanillaDir, outDir);
 
+        if (!Files.exists(mixinDir)) {
+            System.out.println("no mixins found, skipping");
+            return;
+        }
+
         List<Path> mixinClassFiles;
         try (java.util.stream.Stream<Path> walk = Files.walk(mixinDir)) {
             mixinClassFiles = walk.filter(p -> p.toString().endsWith(".class"))
@@ -72,7 +77,7 @@ public final class MixinWeaver {
         for (Path classFile : mixinClassFiles) {
             byte[] bytes = Files.readAllBytes(classFile);
             ClassNode mixinNode = new ClassNode();
-            new ClassReader(bytes).accept(mixinNode, 0);
+            new ClassReader(bytes).accept(mixinNode, ClassReader.EXPAND_FRAMES);
 
             String binaryName = mixinNode.name.replace('/', '.');
             Class<?> mixinClass;
@@ -85,8 +90,10 @@ public final class MixinWeaver {
 
             Mixin mixinAnnotation = mixinClass.getAnnotation(Mixin.class);
             if (mixinAnnotation == null) {
-                continue; // some random helper class in the mixins sourceset w/ no
-                // @Mixin on it, not everything in there has to be a mixin
+                Path dest = outDir.resolve(mixinNode.name + ".class");
+                Files.createDirectories(dest.getParent());
+                Files.write(dest, bytes);
+                continue;
             }
 
             String targetInternalName = Type.getInternalName(mixinAnnotation.value());
@@ -98,7 +105,7 @@ public final class MixinWeaver {
             }
 
             ClassNode targetNode = new ClassNode();
-            new ClassReader(Files.readAllBytes(targetClassFile)).accept(targetNode, 0);
+            new ClassReader(Files.readAllBytes(targetClassFile)).accept(targetNode, ClassReader.EXPAND_FRAMES);
 
             //remaps mixinclass -> targetclass on everything we copy over
             SimpleRemapper remapper = new SimpleRemapper(mixinNode.name, targetNode.name);
