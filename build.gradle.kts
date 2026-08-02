@@ -1,20 +1,83 @@
 plugins {
-    id("java")
+    base
 }
 
-group = "dev.speedslicer"
-version = "1.0-SNAPSHOT"
+gradle.includedBuilds
+    .filter { it.name.startsWith("module-eag-") }
+    .forEach { includedBuild ->
 
-repositories {
-    mavenCentral()
+        val version = includedBuild.name.removePrefix("module-eag-")
+
+        fun registerAlias(
+            name: String,
+            targetTask: String,
+            descriptionText: String
+        ) {
+            tasks.register("${name}_$version") {
+                group = "eaglercraft $version"
+                description = descriptionText
+
+                dependsOn(includedBuild.task(targetTask))
+            }
+        }
+
+        registerAlias(
+            name = "build",
+            targetTask = ":build",
+            descriptionText = "Builds Eaglercraft $version"
+        )
+
+        registerAlias(
+            name = "clean",
+            targetTask = ":clean",
+            descriptionText = "Cleans Eaglercraft $version"
+        )
+
+        registerAlias(
+            name = "runDesktop",
+            targetTask =
+                ":target_lwjgl_desktop:eaglercraftDebugRuntime",
+            descriptionText =
+                "Runs the desktop runtime for Eaglercraft $version"
+        )
+
+        registerAlias(
+            name = "buildJavaScript",
+            targetTask =
+                ":target_teavm_javascript:makeMainOfflineDownload",
+            descriptionText =
+                "Builds the JavaScript client for Eaglercraft $version"
+        )
+
+        registerAlias(
+            name = "buildWasm",
+            targetTask =
+                ":target_teavm_wasm_gc:makeMainWasmClientBundle",
+            descriptionText =
+                "Builds the WASM client for Eaglercraft $version"
+        )
+    }
+
+tasks.register("buildAllEagler") {
+    group = "eaglercraft"
+    description = "Builds every Eaglercraft version"
+
+    dependsOn(
+        tasks.matching {
+            it.name.startsWith("build_") &&
+                    it.name != "buildAllEagler"
+        }
+    )
 }
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:6.0.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
+tasks.register("cleanAllEagler") {
+    group = "eaglercraft"
+    description = "Cleans every Eaglercraft version"
 
-tasks.test {
-    useJUnitPlatform()
+    dependsOn(
+        tasks.matching {
+            it.name.startsWith("clean_") &&
+                    it.name != "cleanAllEagler"
+        }
+    )
 }
