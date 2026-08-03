@@ -66,7 +66,9 @@ Requires Java 17+ I think (Don't quote me on that lol)
 **Compile Offline (UNFINISHED)**
 Right now you have to go into the module you want to compile the offline download then run it in that
 later we'll add a Gradle task here to compile the offline downloads w/o going into the modules.
-```sh MakeOfflineDownload.sh or bash MakeOfflineDownload.sh or .bat whtver```
+```
+sh MakeOfflineDownload.sh or bash MakeOfflineDownload.sh or .bat whtver
+```
 
 
 
