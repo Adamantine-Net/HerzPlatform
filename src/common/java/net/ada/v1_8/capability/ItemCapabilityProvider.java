@@ -5,6 +5,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 public final class ItemCapabilityProvider {
 
+    //likes to be gay and say there are errors that dont exist! (jst ignore it its some weird shit compiling works so doesnt rlly matter)
+
     private static final String ROOT_KEY = "ada_caps";
 
     public static <T> void set(ItemStack stack, ItemCapability<T> capability, T value) {
