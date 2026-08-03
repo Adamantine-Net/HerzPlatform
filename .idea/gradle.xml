@@ -7,20 +7,20 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/module-eag-1_14" name="eaglercraft-workspace-1_14">
+              <build path="$PROJECT_DIR$/modules/module-eag-1_14" name="eaglercraft-workspace-1_14">
                 <projects>
-                  <project path="$PROJECT_DIR$/module-eag-1_14" />
-                  <project path="$PROJECT_DIR$/module-eag-1_14/target_lwjgl_desktop" />
-                  <project path="$PROJECT_DIR$/module-eag-1_14/target_teavm_javascript" />
-                  <project path="$PROJECT_DIR$/module-eag-1_14/target_teavm_wasm_gc" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_14" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_lwjgl_desktop" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_javascript" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
                 </projects>
               </build>
-              <build path="$PROJECT_DIR$/module-eag-1_8" name="eaglercraft-workspace">
+              <build path="$PROJECT_DIR$/modules/module-eag-1_8" name="eaglercraft-workspace">
                 <projects>
-                  <project path="$PROJECT_DIR$/module-eag-1_8" />
-                  <project path="$PROJECT_DIR$/module-eag-1_8/target_lwjgl_desktop" />
-                  <project path="$PROJECT_DIR$/module-eag-1_8/target_teavm_javascript" />
-                  <project path="$PROJECT_DIR$/module-eag-1_8/target_teavm_wasm_gc" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_8" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_lwjgl_desktop" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_javascript" />
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_wasm_gc" />
                 </projects>
               </build>
             </builds>
@@ -31,17 +31,20 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/mixin-loader" />
-            <option value="$PROJECT_DIR$/mixins-1_14" />
-            <option value="$PROJECT_DIR$/mixins-1_8" />
-            <option value="$PROJECT_DIR$/module-eag-1_14" />
-            <option value="$PROJECT_DIR$/module-eag-1_14/target_lwjgl_desktop" />
-            <option value="$PROJECT_DIR$/module-eag-1_14/target_teavm_javascript" />
-            <option value="$PROJECT_DIR$/module-eag-1_14/target_teavm_wasm_gc" />
-            <option value="$PROJECT_DIR$/module-eag-1_8" />
-            <option value="$PROJECT_DIR$/module-eag-1_8/target_lwjgl_desktop" />
-            <option value="$PROJECT_DIR$/module-eag-1_8/target_teavm_javascript" />
-            <option value="$PROJECT_DIR$/module-eag-1_8/target_teavm_wasm_gc" />
+            <option value="$PROJECT_DIR$/mixin" />
+            <option value="$PROJECT_DIR$/mixin/mixin-loader" />
+            <option value="$PROJECT_DIR$/mixin/mixins-1_14" />
+            <option value="$PROJECT_DIR$/mixin/mixins-1_8" />
+            <option value="$PROJECT_DIR$/modules" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_14" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_lwjgl_desktop" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_javascript" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_8" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_lwjgl_desktop" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_javascript" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_wasm_gc" />
+            <option value="$PROJECT_DIR$/modules/moonstar" />
           </set>
         </option>
       </GradleProjectSettings>

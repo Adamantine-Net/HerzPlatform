@@ -12,6 +12,6 @@ public class ItemMixin {
 
     @Inject(method = "registerItems", at = At.TAIL)
     private static void herz$afterRegisterItems() {
-        ItemRegistry.markReady();
+        ItemRegistry.ITEMS.registerAll();
     }
 }

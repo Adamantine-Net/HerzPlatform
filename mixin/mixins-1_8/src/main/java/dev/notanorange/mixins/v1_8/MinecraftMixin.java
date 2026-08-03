@@ -1,5 +1,7 @@
 package dev.notanorange.mixins.v1_8;
 
+import dev.notanorange.api.event.ClientTickEvent;
+import dev.notanorange.api.event.EventBus;
 import dev.notanorange.mixin.annotation.At;
 import dev.notanorange.mixin.annotation.Inject;
 import dev.notanorange.mixin.annotation.Mixin;
@@ -11,5 +13,6 @@ public class MinecraftMixin {
 
     @Inject(method = "runTick", at = At.HEAD)
     private void herz$onRunTick() {
+        EventBus.INSTANCE.post(new ClientTickEvent());
     }
 }

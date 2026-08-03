@@ -20,6 +20,7 @@ sourceSets {
     named("main") {
         java.srcDir(rootDir.resolve("src/common/java"))
         java.exclude("dev/speedslicer/**")
+        java.exclude("dev/notanorange/v1_8/**")
     }
 }
 
