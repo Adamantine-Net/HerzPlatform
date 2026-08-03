@@ -20,8 +20,8 @@ val vanillaClassesDir = rootDir.resolve("modules/module-eag-1_8/build/classes/ja
 sourceSets {
     named("main") {
         java.srcDir(rootDir.resolve("src/common/java"))
-        java.exclude("dev/speedslicer/**") //YAY IT COMPILED
-        java.exclude("dev/notanorange/v1_14/**")
+        java.exclude("net/ada/main/**") //YAY IT COMPILED
+        java.exclude("net/ada/v1_14/**")
     }
 }
 
@@ -53,7 +53,7 @@ val compileFull = tasks.register<JavaExec>("compileFull") {
     classpath = files(
         project(":mixin:mixin-loader").sourceSets["main"].runtimeClasspath
     )
-    mainClass.set("dev.notanorange.mixin.weaver.MixinWeaver")
+    mainClass.set("net.ada.mixin.weaver.MixinWeaver")
 
     doFirst {
         args = listOf(

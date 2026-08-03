@@ -19,5 +19,5 @@ dependencies {
 }
 
 application {
-    mainClass.set("dev.notanorange.mixin.weaver.MixinWeaver")
+    mainClass.set("net.ada.mixin.weaver.MixinWeaver")
 }
