@@ -1,6 +1,6 @@
 [submodule "module-eag-1_14"]
-	path = module-eag-1_14
+	path = modules/module-eag-1_14
     url = https://github.com/Adamantine-Net/module-eag-1_14
 [submodule "module-eag-1_8"]
-	path = module-eag-1_8
+	path = modules/module-eag-1_8
 	url = https://github.com/Eaglercraft-Archive/EaglercraftX-1.8-workspace.git

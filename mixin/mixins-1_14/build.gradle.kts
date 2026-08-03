@@ -1,4 +1,4 @@
-evaluationDependsOn(":mixin-loader")
+evaluationDependsOn(":mixin:mixin-loader")
 
 plugins {
     java
@@ -14,11 +14,18 @@ repositories {
 }
 
 val eaglerModule = gradle.includedBuild("module-eag-1_14")
-val vanillaClassesDir = rootDir.resolve("module-eag-1_14/build/classes/java/main")
+val vanillaClassesDir = rootDir.resolve("modules/module-eag-1_14/build/classes/java/main")
+
+sourceSets {
+    named("main") {
+        java.srcDir(rootDir.resolve("src/common/java"))
+        java.exclude("dev/speedslicer/**")
+    }
+}
 
 dependencies {
     compileOnly(files(vanillaClassesDir))
-    implementation(project(":mixin-loader"))
+    implementation(project(":mixin:mixin-loader"))
 }
 
 tasks.named<JavaCompile>("compileJava") {
@@ -39,10 +46,10 @@ val compileFull = tasks.register<JavaExec>("compileFull") {
 
     dependsOn(tasks.named("compileMixins"))
     dependsOn(eaglerModule.task(":compileJava"))
-    dependsOn(":mixin-loader:compileJava")
+    dependsOn(":mixin:mixin-loader:compileJava")
 
     classpath = files(
-        project(":mixin-loader").sourceSets["main"].runtimeClasspath
+        project(":mixin:mixin-loader").sourceSets["main"].runtimeClasspath
     )
     mainClass.set("dev.notanorange.mixin.weaver.MixinWeaver")
 
