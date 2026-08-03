@@ -50,7 +50,9 @@ Requires Java 17+ I think (Don't quote me on that lol)
 ```
 
 **Desktop Runtime**
-```./gradlew runDesktop_1_8```
+```
+./gradlew runDesktop_1_8
+```
 
 **Compile Everything**
 ```
