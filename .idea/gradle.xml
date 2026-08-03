@@ -15,6 +15,11 @@
                   <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
                 </projects>
               </build>
+              <build path="$PROJECT_DIR$/modules/module-eag-1_5_2" name="eaglercraft">
+                <projects>
+                  <project path="$PROJECT_DIR$/modules/module-eag-1_5_2" />
+                </projects>
+              </build>
               <build path="$PROJECT_DIR$/modules/module-eag-1_8" name="module-eag-1_8">
                 <projects>
                   <project path="$PROJECT_DIR$/modules/module-eag-1_8" />
@@ -34,11 +39,13 @@
             <option value="$PROJECT_DIR$/mixin" />
             <option value="$PROJECT_DIR$/mixin/mixin-loader" />
             <option value="$PROJECT_DIR$/mixin/mixins-1_14" />
+            <option value="$PROJECT_DIR$/mixin/mixins-1_5_2" />
             <option value="$PROJECT_DIR$/mixin/mixins-1_8" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_14" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_lwjgl_desktop" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_javascript" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
+            <option value="$PROJECT_DIR$/modules/module-eag-1_5_2" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_8" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_lwjgl_desktop" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_javascript" />
