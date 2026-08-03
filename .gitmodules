@@ -4,3 +4,6 @@
 [submodule "module-eag-1_8"]
 	path = modules/module-eag-1_8
 	url = https://github.com/Eaglercraft-Archive/EaglercraftX-1.8-workspace.git
+[submodule "modules/module-eag-1_5_2"]
+	path = modules/module-eag-1_5_2
+	url = https://github.com/Eaglercraft-Archive/Eaglercraft-1.5.2-src.git
