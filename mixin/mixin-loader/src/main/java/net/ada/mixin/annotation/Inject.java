@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface Inject {
     String method();
     At at();
+    boolean cancellable() default false;
 }

@@ -162,7 +162,7 @@ public final class MixinWeaver {
                     MethodNode handlerMethod = copyRemapped(mixinMethod, remapper, handlerName, handlerAccess);
                     targetNode.methods.add(handlerMethod);
 
-                    weaveAdvice(targetNode, targetMethod, handlerName, mixinMethod.desc, inject.at(), targetIsStatic);
+                    weaveAdvice(targetNode, targetMethod, handlerName, mixinMethod.desc, inject.at(), targetIsStatic, inject.cancellable());
                     injectCount++;
                 } else {
                     MethodNode targetMethod = findMethodNode(targetNode, mixinMethod.name, mixinMethod.desc);
@@ -250,7 +250,7 @@ public final class MixinWeaver {
     }
 
     private static void weaveAdvice(ClassNode targetNode, MethodNode targetMethod, String handlerName,
-                                    String handlerDesc, At at, boolean isStatic) {
+                                    String handlerDesc, At at, boolean isStatic, boolean cancellable) {
         MethodNode woven = new MethodNode(
                 targetMethod.access,
                 targetMethod.name,
@@ -258,6 +258,11 @@ public final class MixinWeaver {
                 targetMethod.signature,
                 targetMethod.exceptions == null ? null : targetMethod.exceptions.toArray(new String[0])
         );
+
+        Type returnType = Type.getReturnType(targetMethod.desc);
+        String cbType = returnType.getSort() == Type.VOID
+                ? "net/ada/mixin/callback/CallbackInfo"
+                : "net/ada/mixin/callback/CallbackInfoReturnable";
 
         AdviceAdapter advice = new AdviceAdapter(Opcodes.ASM9, woven, targetMethod.access, targetMethod.name, targetMethod.desc) {
             @Override
@@ -279,9 +284,79 @@ public final class MixinWeaver {
                     loadThis();
                 }
                 loadArgs();
+
+                int cbVar = -1;
+                if (cancellable) {
+                    visitTypeInsn(Opcodes.NEW, cbType);
+                    visitInsn(Opcodes.DUP);
+                    visitMethodInsn(Opcodes.INVOKESPECIAL, cbType, "<init>", "()V", false);
+                    cbVar = newLocal(Type.getObjectType(cbType));
+                    visitInsn(Opcodes.DUP);
+                    visitVarInsn(Opcodes.ASTORE, cbVar);
+                }
+
                 // private methods HAVE to be called w/ invokespecial, invokevirtual or it will litterally just blow up at verify time :soB:
                 int invokeOpcode = isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKESPECIAL;
                 visitMethodInsn(invokeOpcode, targetNode.name, handlerName, handlerDesc, false);
+
+                if (cancellable) {
+                    visitVarInsn(Opcodes.ALOAD, cbVar);
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "net/ada/mixin/callback/CallbackInfo", "isCancelled", "()Z", false);
+                    org.objectweb.asm.Label skip = new org.objectweb.asm.Label();
+                    visitJumpInsn(Opcodes.IFEQ, skip);
+
+                    if (returnType.getSort() == Type.VOID) {
+                        visitInsn(Opcodes.RETURN);
+                    } else {
+                        visitVarInsn(Opcodes.ALOAD, cbVar);
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, cbType, "getReturnValue", "()Ljava/lang/Object;", false);
+                        emitUnboxAndReturn(returnType);
+                    }
+
+                    visitLabel(skip);
+                }
+            }
+
+            //holy fucked code
+            private void emitUnboxAndReturn(Type type) {
+                switch (type.getSort()) {
+                    case Type.BOOLEAN:
+                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+                        visitInsn(Opcodes.IRETURN); //yeah booleans return thru ireturn too, theres no returnn
+                        break;
+                    case Type.BYTE:
+                    case Type.SHORT:
+                    case Type.CHAR:
+                    case Type.INT:
+                        //byte/short/char are all just ints as far as the jvm stack is concerned so they
+                        //all unbox thru int and all use ireturn same deal as boolean i wrote above
+                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Integer");
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
+                        visitInsn(Opcodes.IRETURN);
+                        break;
+                    case Type.LONG:
+                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Long");
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
+                        visitInsn(Opcodes.LRETURN);
+                        break;
+                    case Type.FLOAT:
+                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Float");
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
+                        visitInsn(Opcodes.FRETURN);
+                        break;
+                    case Type.DOUBLE:
+                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Double");
+                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
+                        visitInsn(Opcodes.DRETURN);
+                        break;
+                    default:
+                        //not a primitive so  you dont need to unbox anything jst make sure its actually the right type
+                        //or itll fuck itself and crash
+                        visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
+                        visitInsn(Opcodes.ARETURN);
+                        break;
+                }
             }
         };
 
