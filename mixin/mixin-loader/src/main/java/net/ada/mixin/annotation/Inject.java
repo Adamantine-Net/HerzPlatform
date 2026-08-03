@@ -11,4 +11,5 @@ public @interface Inject {
     String method();
     At at();
     boolean cancellable() default false;
+    String target() default "";
 }

@@ -2,5 +2,6 @@ package net.ada.mixin.annotation;
 
 public enum At {
     HEAD,
-    TAIL
+    TAIL,
+    BEFORE_CALL
 }

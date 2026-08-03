@@ -15,10 +15,13 @@ import org.objectweb.asm.commons.MethodRemapper;
 import org.objectweb.asm.commons.SimpleRemapper;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -162,7 +165,16 @@ public final class MixinWeaver {
                     MethodNode handlerMethod = copyRemapped(mixinMethod, remapper, handlerName, handlerAccess);
                     targetNode.methods.add(handlerMethod);
 
-                    weaveAdvice(targetNode, targetMethod, handlerName, mixinMethod.desc, inject.at(), targetIsStatic, inject.cancellable());
+
+                    //new b4 call check
+                    if (inject.at() == At.BEFORE_CALL) {
+                        if (inject.cancellable()) {
+                            throw new IllegalStateException("@Inject " + binaryName + " BEFORE_CALL doesnt support cancellable yet");
+                        }
+                        injectBeforeCall(targetNode, targetMethod, inject.target(), handlerName, mixinMethod.desc, targetIsStatic, binaryName);
+                    } else {
+                        weaveAdvice(targetNode, targetMethod, handlerName, mixinMethod.desc, inject.at(), targetIsStatic, inject.cancellable());
+                    }
                     injectCount++;
                 } else {
                     MethodNode targetMethod = findMethodNode(targetNode, mixinMethod.name, mixinMethod.desc);
@@ -249,6 +261,58 @@ public final class MixinWeaver {
         return copy;
     }
 
+    private static void injectBeforeCall(ClassNode targetNode, MethodNode targetMethod, String targetCallName,
+                                          String handlerName, String handlerDesc, boolean isStatic, String binaryName) {
+        MethodInsnNode match = null;
+        for (AbstractInsnNode insn : targetMethod.instructions.toArray()) {
+            if (insn instanceof MethodInsnNode && ((MethodInsnNode) insn).name.equals(targetCallName)) {
+                if (match != null) {
+                    throw new IllegalStateException("@Inject " + binaryName + " found more than one call to '"
+                            + targetCallName + "' in " + targetMethod.name + ", cant tell which one you meant");
+                }
+                match = (MethodInsnNode) insn;
+            }
+        }
+        if (match == null) {
+            throw new IllegalStateException("@Inject " + binaryName + " didnt find a call to '" + targetCallName
+                    + "' anywhere in " + targetMethod.name);
+        }
+
+        InsnList toInsert = new InsnList();
+        int slot = 0;
+        if (!isStatic) {
+            toInsert.add(new VarInsnNode(Opcodes.ALOAD, slot));
+            slot++;
+        }
+        for (Type argType : Type.getArgumentTypes(targetMethod.desc)) {
+            toInsert.add(new VarInsnNode(loadOpcodeFor(argType), slot));
+            slot += argType.getSize();
+        }
+        int invokeOpcode = isStatic ? Opcodes.INVOKESTATIC : Opcodes.INVOKESPECIAL;
+        toInsert.add(new MethodInsnNode(invokeOpcode, targetNode.name, handlerName, handlerDesc, false));
+
+        targetMethod.instructions.insertBefore(match, toInsert);
+    }
+
+    private static int loadOpcodeFor(Type type) {
+        switch (type.getSort()) {
+        case Type.BOOLEAN:
+        case Type.BYTE:
+        case Type.CHAR:
+        case Type.SHORT:
+        case Type.INT:
+            return Opcodes.ILOAD;
+        case Type.LONG:
+            return Opcodes.LLOAD;
+        case Type.FLOAT:
+            return Opcodes.FLOAD;
+        case Type.DOUBLE:
+            return Opcodes.DLOAD;
+        default:
+            return Opcodes.ALOAD;
+        }
+    }
+
     private static void weaveAdvice(ClassNode targetNode, MethodNode targetMethod, String handlerName,
                                     String handlerDesc, At at, boolean isStatic, boolean cancellable) {
         MethodNode woven = new MethodNode(
@@ -320,42 +384,41 @@ public final class MixinWeaver {
             //holy fucked code
             private void emitUnboxAndReturn(Type type) {
                 switch (type.getSort()) {
-                    case Type.BOOLEAN:
-                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
-                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
-                        visitInsn(Opcodes.IRETURN); //yeah booleans return thru ireturn too, theres no returnn
-                        break;
-                    case Type.BYTE:
-                    case Type.SHORT:
-                    case Type.CHAR:
-                    case Type.INT:
-                        //byte/short/char are all just ints as far as the jvm stack is concerned so they
-                        //all unbox thru int and all use ireturn same deal as boolean i wrote above
-                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Integer");
-                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
-                        visitInsn(Opcodes.IRETURN);
-                        break;
-                    case Type.LONG:
-                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Long");
-                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
-                        visitInsn(Opcodes.LRETURN);
-                        break;
-                    case Type.FLOAT:
-                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Float");
-                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
-                        visitInsn(Opcodes.FRETURN);
-                        break;
-                    case Type.DOUBLE:
-                        visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Double");
-                        visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
-                        visitInsn(Opcodes.DRETURN);
-                        break;
-                    default:
-                        //not a primitive so  you dont need to unbox anything jst make sure its actually the right type
-                        //or itll fuck itself and crash
-                        visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
-                        visitInsn(Opcodes.ARETURN);
-                        break;
+                case Type.BOOLEAN:
+                    visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Boolean");
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false);
+                    visitInsn(Opcodes.IRETURN); //yeah booleans return thru ireturn too so theres no breturn
+                    break;
+                case Type.BYTE:
+                case Type.SHORT:
+                case Type.CHAR:
+                case Type.INT:
+                    //byte/short/char are all just ints as far as the jvm stack is concerned so they
+                    //all unbox thru int and all use ireturn same deal as boolean above
+                    visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Integer");
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false);
+                    visitInsn(Opcodes.IRETURN);
+                    break;
+                case Type.LONG:
+                    visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Long");
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()J", false);
+                    visitInsn(Opcodes.LRETURN);
+                    break;
+                case Type.FLOAT:
+                    visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Float");
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false);
+                    visitInsn(Opcodes.FRETURN);
+                    break;
+                case Type.DOUBLE:
+                    visitTypeInsn(Opcodes.CHECKCAST, "java/lang/Double");
+                    visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false);
+                    visitInsn(Opcodes.DRETURN);
+                    break;
+                default:
+                    //make sure its the right type so it doesnt fuck itself
+                    visitTypeInsn(Opcodes.CHECKCAST, type.getInternalName());
+                    visitInsn(Opcodes.ARETURN);
+                    break;
                 }
             }
         };
