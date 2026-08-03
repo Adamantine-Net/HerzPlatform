@@ -1,6 +1,6 @@
 # HerzPlatform
 
-HerzPlatform is custom tailored high quality modding api for Eaglercraft developers of all versions.
+# Better, human docs incoming!!!
 
 # How it works
 
