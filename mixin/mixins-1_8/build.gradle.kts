@@ -22,6 +22,7 @@ sourceSets {
         java.srcDir(rootDir.resolve("src/common/java"))
         java.exclude("net/ada/main/**") //YAY IT COMPILED
         java.exclude("net/ada/v1_14/**")
+        java.exclude("net/ada/v1_5_2/**")//exclude
     }
 }
 

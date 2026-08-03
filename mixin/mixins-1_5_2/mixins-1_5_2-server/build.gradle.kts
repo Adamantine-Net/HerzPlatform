@@ -16,6 +16,15 @@ repositories {
 val spServerModule = gradle.includedBuild("sp-server")
 val vanillaClassesDir = rootDir.resolve("modules/module-eag-1_5_2/sp-server/build/classes/java/main")
 
+sourceSets {
+    named("main") {
+        java.srcDir(rootDir.resolve("src/common/java"))
+        java.include("net/ada/v1_5_2/worldgen/**")
+        java.include("net/ada/v1_5_2/persist/**")
+        java.include("net/ada/api/**")
+    }
+}
+
 dependencies {
     compileOnly(files(vanillaClassesDir))
     implementation(project(":mixin:mixin-loader"))

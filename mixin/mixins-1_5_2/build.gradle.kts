@@ -22,6 +22,8 @@ sourceSets {
         java.exclude("net/ada/main/**")
         java.exclude("net/ada/v1_8/**")
         java.exclude("net/ada/v1_14/**")
+        java.exclude("net/ada/v1_5_2/worldgen/**")//whoopty do
+        java.exclude("net/ada/v1_5_2/persist/**")//whoopty do
     }
 }
 
