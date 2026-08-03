@@ -1,6 +1,7 @@
 package dev.notanorange.v1_8.item;
 
 import dev.notanorange.api.registry.DeferredRegister;
+import dev.notanorange.api.registry.IdMapping;
 import dev.notanorange.api.registry.Registry;
 
 import net.minecraft.item.Item;
@@ -8,8 +9,10 @@ import net.minecraft.util.ResourceLocation;
 
 public final class ItemRegistry {
 
+    public static final IdMapping IDS = new IdMapping(20000);
+
     public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(
-            new Registry<>("items", 20000),
+            new Registry<>("items", IDS),
             (id, name, item) -> Item.itemRegistry.register(id, new ResourceLocation(name), item)
     );
 
