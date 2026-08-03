@@ -45,6 +45,11 @@ public final class EventBus {
         }
     }
 
+    public synchronized boolean hasListeners(Class<? extends Event> eventType) {
+        List<Listener> list = listeners.get(eventType);
+        return list != null && !list.isEmpty();
+    }
+
     public void post(Event event) {
         List<Listener> matching;
         synchronized (this) {
