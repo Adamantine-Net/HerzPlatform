@@ -3,16 +3,21 @@ package net.ada.mixin.weaver;
 import net.ada.mixin.annotation.At;
 import net.ada.mixin.annotation.Inject;
 import net.ada.mixin.annotation.Mixin;
+import net.ada.mixin.annotation.ModifyConstant;
 import net.ada.mixin.annotation.Overwrite;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.MethodRemapper;
 import org.objectweb.asm.commons.SimpleRemapper;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import java.io.IOException;
@@ -73,6 +78,7 @@ public final class MixinWeaver {
         int mixinCount = 0;
         int injectCount = 0;
         int overwriteCount = 0;
+        int modifyCount = 0;
 
         for (Path classFile : mixinClassFiles) {
             byte[] bytes = Files.readAllBytes(classFile);
@@ -114,8 +120,20 @@ public final class MixinWeaver {
             for (java.lang.reflect.Method reflectMethod : mixinClass.getDeclaredMethods()) {
                 Inject inject = reflectMethod.getAnnotation(Inject.class);
                 Overwrite overwrite = reflectMethod.getAnnotation(Overwrite.class);
-                if (inject == null && overwrite == null) {
+                ModifyConstant modifyConstant = reflectMethod.getAnnotation(ModifyConstant.class);
+                if (inject == null && overwrite == null && modifyConstant == null) {
                     continue; //plain helper method on the mixin class, not a real mixin op
+                }
+
+                if (modifyConstant != null) {
+                    MethodNode targetMethod = findMethod(targetNode, modifyConstant.method());
+                    if (targetMethod == null) {
+                        throw new IllegalStateException("@ModifyConstant " + binaryName + " method '"
+                                + modifyConstant.method() + "' not found on " + mixinAnnotation.value().getName());
+                    }
+                    patchConstant(targetMethod, modifyConstant.constant(), modifyConstant.replacement(), binaryName);
+                    modifyCount++;
+                    continue;
                 }
 
                 String desc = Type.getMethodDescriptor(reflectMethod);
@@ -167,7 +185,56 @@ public final class MixinWeaver {
         }
 
         loader.close();
-        System.out.println("wove " + mixinCount + " mixin(s), " + injectCount + " inject, " + overwriteCount + " overwrite");
+        System.out.println("wove " + mixinCount + " mixin(s), " + injectCount + " inject, " + overwriteCount + " overwrite, " + modifyCount + " modify");
+    }
+
+    private static void patchConstant(MethodNode method, int constant, int replacement, String binaryName) {
+        AbstractInsnNode match = null;
+        for (AbstractInsnNode insn : method.instructions.toArray()) {
+            Integer value = getPushedInt(insn);
+            if (value != null && value == constant) {
+                if (match != null) {
+                    throw new IllegalStateException("@ModifyConstant " + binaryName + " found more than one "
+                            + constant + " in " + method.name + ", cant tell which one you meant");
+                }
+                match = insn;
+            }
+        }
+        if (match == null) {
+            throw new IllegalStateException("@ModifyConstant " + binaryName + " didnt find " + constant
+                    + " anywhere in " + method.name);
+        }
+        method.instructions.set(match, pushInt(replacement));
+    }
+
+    private static Integer getPushedInt(AbstractInsnNode insn) {
+        int opcode = insn.getOpcode();
+        if (opcode >= Opcodes.ICONST_M1 && opcode <= Opcodes.ICONST_5) {
+            return opcode - Opcodes.ICONST_0;
+        }
+        if (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH) {
+            return ((IntInsnNode) insn).operand;
+        }
+        if (opcode == Opcodes.LDC) {
+            Object cst = ((LdcInsnNode) insn).cst;
+            if (cst instanceof Integer) {
+                return (Integer) cst;
+            }
+        }
+        return null;
+    }
+
+    private static AbstractInsnNode pushInt(int value) {
+        if (value >= -1 && value <= 5) {
+            return new InsnNode(Opcodes.ICONST_0 + value);
+        }
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            return new IntInsnNode(Opcodes.BIPUSH, value);
+        }
+        if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            return new IntInsnNode(Opcodes.SIPUSH, value);
+        }
+        return new LdcInsnNode(value);
     }
 
     private static MethodNode copyRemapped(MethodNode original, SimpleRemapper remapper, String newName, int newAccess) {
