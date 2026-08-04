@@ -1,6 +1,3 @@
-[submodule "module-eag-1_14"]
-	path = modules/module-eag-1_14
-    url = https://github.com/Adamantine-Net/module-eag-1_14
 [submodule "module-eag-1_8"]
 	path = modules/module-eag-1_8
 	url = https://github.com/Adamantine-Net/module-eag-1_8
