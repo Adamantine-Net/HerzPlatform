@@ -10,12 +10,9 @@
               <build path="$PROJECT_DIR$/modules/module-eag-1_14" name="module-eag-1_14">
                 <projects>
                   <project path="$PROJECT_DIR$/modules/module-eag-1_14" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_lwjgl_desktop" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_javascript" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
                 </projects>
               </build>
-              <build path="$PROJECT_DIR$/modules/module-eag-1_5_2" name="eaglercraft">
+              <build path="$PROJECT_DIR$/modules/module-eag-1_5_2" name="module-eag-1_5_2">
                 <projects>
                   <project path="$PROJECT_DIR$/modules/module-eag-1_5_2" />
                 </projects>
@@ -23,9 +20,6 @@
               <build path="$PROJECT_DIR$/modules/module-eag-1_8" name="module-eag-1_8">
                 <projects>
                   <project path="$PROJECT_DIR$/modules/module-eag-1_8" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_lwjgl_desktop" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_javascript" />
-                  <project path="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_wasm_gc" />
                 </projects>
               </build>
             </builds>
@@ -42,14 +36,8 @@
             <option value="$PROJECT_DIR$/mixin/mixins-1_5_2" />
             <option value="$PROJECT_DIR$/mixin/mixins-1_8" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_14" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_lwjgl_desktop" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_javascript" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_14/target_teavm_wasm_gc" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_5_2" />
             <option value="$PROJECT_DIR$/modules/module-eag-1_8" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_lwjgl_desktop" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_javascript" />
-            <option value="$PROJECT_DIR$/modules/module-eag-1_8/target_teavm_wasm_gc" />
           </set>
         </option>
       </GradleProjectSettings>
