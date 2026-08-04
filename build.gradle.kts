@@ -73,10 +73,28 @@ subprojects
 
         tasks.register("buildFull_$version") {
             group = "eaglercraft $version"
-            description = "weaves mixins then builds the js client for eag $version"
+            description = "weaves mixins then builds the js client for eag $version, then the output goes into builds/$version"
 
             dependsOn("compileFull_$version")
             dependsOn("buildJavaScript_$version")
+
+            doLast {
+                val outDir = rootDir.resolve("builds/$version")
+                outDir.mkdirs()
+
+                val jsFolder = rootDir.resolve("modules/module-eag-$version/target_teavm_javascript/javascript")
+                if (jsFolder.exists()) {
+                    jsFolder.listFiles { f -> f.name.endsWith(".html") }?.forEach { htmlFile ->
+                        htmlFile.copyTo(outDir.resolve(htmlFile.name), overwrite = true)
+                    }
+                    println("done, output in builds/$version")
+                } else {
+                    println("no js folder found at $jsFolder, this version might not use target_teavm_javascript >: so we skipping it")
+                }
+            }
+        }
+        tasks.named("buildJavaScript_$version") {
+            mustRunAfter("compileFull_$version")
         }
     }
 

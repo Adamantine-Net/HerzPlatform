@@ -33,8 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
-//import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public final class MixinWeaver {
@@ -197,7 +197,88 @@ public final class MixinWeaver {
         }
 
         loader.close();
-        System.out.println("wove " + mixinCount + " mixin(s), " + injectCount + " inject, " + overwriteCount + " overwrite, " + modifyCount + " modify");
+
+        //scans EVERYTHING thats in the output now (vanilla+patched+our own classes+
+        //any mod jar classes that got merged in earlier) looking for anything that
+        //implements ModInitializer, then writes the serviceloader manifest file for
+        //it ourselves. this is the whole trick that makes mods need zero manual
+        //registration, ServiceLoader picks these up automatically at runtime
+        int modCount = scanForModInitializers(outDir);
+        System.out.println("wove " + mixinCount + " mixin(s), " + injectCount + " inject, " + overwriteCount + " overwrite, " + modifyCount + " modify, " + modCount + " mod initializer(s)");
+    }
+
+    private static int scanForModInitializers(Path outDir) throws IOException {
+        List<String> found = new ArrayList<>();
+        List<Path> allClasses;
+        try (java.util.stream.Stream<Path> walk = Files.walk(outDir)) {
+            allClasses = walk.filter(p -> p.toString().endsWith(".class")).collect(Collectors.toList());
+        }
+
+        for (Path classFile : allClasses) {
+            ClassNode node = new ClassNode();
+            new ClassReader(Files.readAllBytes(classFile)).accept(node, 0);
+            if (node.interfaces != null && node.interfaces.contains("net/ada/api/mod/ModInitializer")) {
+                found.add(node.name); // internal name (slashes), needed for bytecode gen below
+            }
+        }
+
+        if (found.isEmpty()) {
+            return 0;
+        }
+
+        patchModLoader(outDir, found);
+        return found.size();
+    }
+
+    // no ServiceLoader here on purpose, TeaVM's support for runtime classpath
+    // resource scanning (META-INF/services lookups) isnt reliable enough to bet
+    // on, same category of gap as java.util.function not working right earlier.
+    // instead we just generate ModLoader.initAll()'s ENTIRE method body fresh,
+    // baking in a direct "new XxxInit().onInit();" call for every mod found.
+    // ends up as completely ordinary statically reachable bytecode, no dynamic
+    // discovery mechanism involved at all so theres nothing for TeaVM to trip on
+    private static void patchModLoader(Path outDir, List<String> initializerInternalNames) throws IOException {
+        Path modLoaderFile = outDir.resolve("net/ada/api/mod/ModLoader.class");
+        if (!Files.exists(modLoaderFile)) {
+            throw new IllegalStateException("found ModInitializer implementations but net/ada/api/mod/ModLoader.class doesn't exist, cant wire them up");
+        }
+
+        ClassNode node = new ClassNode();
+        new ClassReader(Files.readAllBytes(modLoaderFile)).accept(node, ClassReader.EXPAND_FRAMES);
+
+        MethodNode oldMethod = findMethodNode(node, "initAll", "()V");
+        if (oldMethod == null) {
+            throw new IllegalStateException("ModLoader.initAll()V not found, cant wire up mod initializers");
+        }
+
+        MethodNode generated = new MethodNode(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "initAll", "()V", null, null);
+        generated.visitCode();
+
+        org.objectweb.asm.Label notYetInit = new org.objectweb.asm.Label();
+        generated.visitFieldInsn(Opcodes.GETSTATIC, "net/ada/api/mod/ModLoader", "initialized", "Z");
+        generated.visitJumpInsn(Opcodes.IFEQ, notYetInit); // if false, skip past the early return
+        generated.visitInsn(Opcodes.RETURN); // already initialized, bail out
+        generated.visitLabel(notYetInit);
+        generated.visitInsn(Opcodes.ICONST_1);
+        generated.visitFieldInsn(Opcodes.PUTSTATIC, "net/ada/api/mod/ModLoader", "initialized", "Z");
+
+        for (String internalName : initializerInternalNames) {
+            generated.visitTypeInsn(Opcodes.NEW, internalName);
+            generated.visitInsn(Opcodes.DUP);
+            generated.visitMethodInsn(Opcodes.INVOKESPECIAL, internalName, "<init>", "()V", false);
+            generated.visitMethodInsn(Opcodes.INVOKEINTERFACE, "net/ada/api/mod/ModInitializer", "onInit", "()V", true);
+        }
+
+        generated.visitInsn(Opcodes.RETURN);
+        generated.visitMaxs(0, 0);
+        generated.visitEnd();
+
+        node.methods.remove(oldMethod);
+        node.methods.add(generated);
+
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        node.accept(cw);
+        Files.write(modLoaderFile, cw.toByteArray());
     }
 
     private static void patchConstant(MethodNode method, int constant, int replacement, String binaryName) {
