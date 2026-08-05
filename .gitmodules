@@ -1,9 +1,6 @@
-[submodule "module-eag-1_8"]
-	path = modules/module-eag-1_8
+[submodule "modules/eag/module-eag-1_8"]
+	path = modules/eag/module-eag-1_8
 	url = https://github.com/Adamantine-Net/module-eag-1_8
-[submodule "modules/module-eag-1_5_2"]
-	path = modules/module-eag-1_5_2
+[submodule "modules/eag/module-eag-1_5_2"]
+	path = modules/eag/module-eag-1_5_2
 	url = https://github.com/Adamantine-Net/module-eag-1_5_2
-[submodule "modules/module-eag-1_14"]
-	path = modules/module-eag-1_14
-	url = https://github.com/Adamantine-Net/module-eag-1_14
