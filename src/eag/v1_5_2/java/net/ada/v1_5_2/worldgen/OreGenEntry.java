@@ -1,6 +1,6 @@
 package net.ada.v1_5_2.worldgen;
 
-import net.minecraft.src .WorldGenerator;
+import net.minecraft.src.WorldGenerator;
 
 public final class OreGenEntry {
 

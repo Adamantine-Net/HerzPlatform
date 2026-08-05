@@ -21,6 +21,8 @@ sourceSets {
         java.srcDir(rootDir.resolve("src/common/java"))
         java.srcDir(rootDir.resolve("src/api/java"))
         java.srcDir(rootDir.resolve("src/eag/v1_5_2/java"))
+
+        java.exclude("net/ada/v1_5_2/worldgen/**")
     }
 }
 
