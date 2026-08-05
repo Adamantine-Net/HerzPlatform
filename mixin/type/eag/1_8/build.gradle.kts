@@ -16,7 +16,7 @@ repositories {
 }
 
 val eaglerModule = gradle.includedBuild("module-eag-1_8")
-val vanillaClassesDir = rootDir.resolve("modules/module-eag-1_8/build/classes/java/main")
+val vanillaClassesDir = rootDir.resolve("modules/eag/module-eag-1_8/build/classes/java/main")
 
 val modJarSourceDir = layout.buildDirectory.dir("modJarSources").get().asFile
 modJarSourceDir.mkdirs()
@@ -46,9 +46,8 @@ if (modJarsDirForSource.exists()) {
 sourceSets {
     named("main") {
         java.srcDir(rootDir.resolve("src/common/java"))
-        java.exclude("net/ada/main/**") //YAY IT COMPILED
-        java.exclude("net/ada/v1_14/**")
-        java.exclude("net/ada/v1_5_2/**")//exclude
+        java.srcDir(rootDir.resolve("src/api/java"))
+        java.srcDir(rootDir.resolve("src/eag/v1_8/java"))
 
         java.srcDir(modJarSourceDir)
 

@@ -14,16 +14,13 @@ repositories {
 }
 
 val eaglerModule = gradle.includedBuild("module-eag-1_5_2")
-val vanillaClassesDir = rootDir.resolve("modules/module-eag-1_5_2/build/classes/java/main")
+val vanillaClassesDir = rootDir.resolve("modules/eag/module-eag-1_5_2/build/classes/java/main")
 
 sourceSets {
     named("main") {
         java.srcDir(rootDir.resolve("src/common/java"))
-        java.exclude("net/ada/main/**")
-        java.exclude("net/ada/v1_8/**")
-        java.exclude("net/ada/v1_14/**")
-        java.exclude("net/ada/v1_5_2/worldgen/**")//whoopty do
-        java.exclude("net/ada/v1_5_2/persist/**")//whoopty do
+        java.srcDir(rootDir.resolve("src/api/java"))
+        java.srcDir(rootDir.resolve("src/eag/v1_5_2/java"))
     }
 }
 
