@@ -51,6 +51,7 @@ public final class EventBus {
     }
 
     public void post(Event event) {
+        System.out.println("Event ran: " + event.toString());
         List<Listener> matching;
         synchronized (this) {
             List<Listener> found = listeners.get(event.getClass());

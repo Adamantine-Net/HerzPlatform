@@ -133,3 +133,8 @@ tasks.register("compileWithMods") {
     description = "Same as compileFull - anything dropped in mods/eagler/mods gets included automatically"
     dependsOn(compileFull)
 }
+
+tasks.register("desktopRuntime") {
+    group="desktopruntime"
+
+}

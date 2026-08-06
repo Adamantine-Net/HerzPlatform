@@ -14,7 +14,7 @@ public class MinecraftMixin {
 
     @Inject(method = "runTick", at = At.HEAD)
     private void herz$onRunTick() {
-        ModLoader.initAll(); // modloader guards it internally <3
+        ModLoader.initAll(); // modloader guards it internally <3 (Shaun Note: IDK If this is supposed to be here...)
         EventBus.INSTANCE.post(new ClientTickEvent());
     }
 }
