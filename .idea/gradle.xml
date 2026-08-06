@@ -7,11 +7,6 @@
         <compositeConfiguration>
           <compositeBuild compositeDefinitionSource="SCRIPT">
             <builds>
-              <build path="$PROJECT_DIR$/modules/eag/module-eag-1_5_2" name="eaglercraft">
-                <projects>
-                  <project path="$PROJECT_DIR$/modules/eag/module-eag-1_5_2" />
-                </projects>
-              </build>
               <build path="$PROJECT_DIR$/modules/eag/module-eag-1_8" name="eaglercraft-workspace-1_8">
                 <projects>
                   <project path="$PROJECT_DIR$/modules/eag/module-eag-1_8" />
@@ -32,9 +27,7 @@
             <option value="$PROJECT_DIR$/mixin/mixin-loader" />
             <option value="$PROJECT_DIR$/mixin/type" />
             <option value="$PROJECT_DIR$/mixin/type/eag" />
-            <option value="$PROJECT_DIR$/mixin/type/eag/1_5_2" />
             <option value="$PROJECT_DIR$/mixin/type/eag/1_8" />
-            <option value="$PROJECT_DIR$/modules/eag/module-eag-1_5_2" />
             <option value="$PROJECT_DIR$/modules/eag/module-eag-1_8" />
             <option value="$PROJECT_DIR$/modules/eag/module-eag-1_8/target_lwjgl_desktop" />
             <option value="$PROJECT_DIR$/modules/eag/module-eag-1_8/target_teavm_javascript" />
